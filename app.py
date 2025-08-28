@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Main function to set up and run the bot."""
-    logger.info(f"Starting Family Bot {VERSION}")
+    logger.info(f"Starting Ford-Fencers-Bot {VERSION}")
     logger.info(f"Log level: {settings.LOG_LEVEL}")
     logger.info(f"Timezone: {settings.TZ}")
     

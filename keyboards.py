@@ -3,11 +3,10 @@ from typing import List, Tuple, Set
 
 
 def main_menu():
-    """Create the main menu inline keyboard with placeholder buttons."""
+    """Create the main menu inline keyboard for group chat."""
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("To-Dos", callback_data="noop:todos")],
-        [InlineKeyboardButton("Tournaments", callback_data="noop:tourneys")],
-        [InlineKeyboardButton("Reminders", callback_data="noop:reminders")],
+        [InlineKeyboardButton("Asks", callback_data="noop:asks")],
+        [InlineKeyboardButton("Tournaments", callback_data="noop:tournaments")],
     ])
 
 

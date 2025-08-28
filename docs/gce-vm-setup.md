@@ -1,4 +1,4 @@
-# Google Cloud VM Setup Guide (Telegram Test Bot)
+# Google Cloud VM Setup Guide (Ford-Fencers-Bot)
 
 This guide walks you through creating a small Google Compute Engine (GCE) VM and running the minimal Telegram test bot as a system service. It assumes no prior cloud experience.
 
@@ -124,21 +124,21 @@ Create the unit file so the bot runs on boot and auto-restarts.
 
 1. Open the unit file (replace `frank` with your VM username):
 ```
-sudo nano /etc/systemd/system/family-bot.service
+sudo nano /etc/systemd/system/ford-fencers-bot.service
 ```
 
 2. Paste:
 ```
 [Unit]
-Description=Family Organizer Test Bot
+Description=Ford-Fencers-Bot
 After=network.target
 
 [Service]
 User=frank
-WorkingDirectory=/home/frank/family-bot
-EnvironmentFile=/home/frank/family-bot/.env
+WorkingDirectory=/home/frank/fordfencers_telegram
+EnvironmentFile=/home/frank/fordfencers_telegram/.env
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/home/frank/family-bot/.venv/bin/python app.py
+ExecStart=/home/frank/fordfencers_telegram/.venv/bin/python /home/frank/fordfencers_telegram/app.py
 Restart=always
 RestartSec=5
 
@@ -149,13 +149,13 @@ WantedBy=multi-user.target
 3. Enable and start the service:
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable --now family-bot
+sudo systemctl enable --now ford-fencers-bot
 ```
 
 4. Check status and logs:
 ```
-systemctl status family-bot
-sudo journalctl -u family-bot -f
+systemctl status ford-fencers-bot
+sudo journalctl -u ford-fencers-bot -f
 ```
 
 If it’s running, you’re good. If it failed, read the logs for errors (e.g., missing token, bad path).
@@ -166,8 +166,8 @@ If it’s running, you’re good. If it failed, read the logs for errors (e.g., 
 - If nothing happens, check logs via `journalctl`.
 
 ## Maintenance Cheat Sheet
-- View logs (live): `sudo journalctl -u family-bot -f`
-- Restart the bot: `sudo systemctl restart family-bot`
+- View logs (live): `sudo journalctl -u ford-fencers-bot -f`
+- Restart the bot: `sudo systemctl restart ford-fencers-bot`
 - Update code (GitHub):
 ```
 cd ~/family-bot && git pull
@@ -188,4 +188,3 @@ sudo systemctl restart family-bot
 
 ---
 Once the developer lands the “test bot bootstrap” code, return to Step 7 to install dependencies and start the service. After you confirm `/start` works, we’ll move to Phase 1 features.
-

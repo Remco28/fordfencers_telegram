@@ -11,6 +11,8 @@
 [2025-08-28 04:49] [Architect]: REVIEW NOTES: Posted Asks MVP change notes at comms/tasks/2025-08-28-asks-mvp-review-notes.md for dev feedback.
 [2025-08-28 05:00] [Architect]: SPEC UPDATED: Amended Asks MVP spec to require unified /ask DM entry and added implementation notes.
 [2025-08-28 05:03] [Architect]: REVIEW PASS: Verified /ask DM entry fix, deterministic chat_id, and version sourcing; ready to deploy and test.
+[2025-08-28 05:10] [Architect]: CODE UPDATED: Renamed bot strings to Ford-Fencers-Bot, adjusted group prompts to @Ford-Fencers-Bot, updated group menu to [Asks, Tournaments], ensured DM /start shows DM menu.
+[2025-08-28 05:10] [Architect]: DOC UPDATED: Renamed roadmap and GCE setup guide to Ford-Fencers-Bot; updated service/unit examples and commands.
 [2025-08-28 14:20] [CLAUDE]: IMPL IN_PROGRESS: Bootstrap minimal test bot implementation
 [2025-08-28 14:25] [CLAUDE]: IMPL DONE: Bootstrap minimal test bot - created requirements.txt, config.py, handlers/commands.py, keyboards.py, app.py with /start, /health, /version commands
 [2025-08-27 23:06] [Frank]: Google Cloud VM server acquired. Set up in progress.

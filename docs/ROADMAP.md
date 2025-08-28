@@ -1,4 +1,4 @@
-# Family Organizer Telegram Bot – Roadmap
+# Ford-Fencers-Bot – Roadmap
 
 ## Vision
 - Simple, reliable family bot focused on lightweight “Asks” (ask <person> to do <thing>), with future tournaments and reminders.
