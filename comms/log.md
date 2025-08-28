@@ -22,3 +22,19 @@
 [2025-08-28 15:05] [CLAUDE]: IMPL DONE: Critical bug fix - /ask DM command now works without async errors, plus version consistency and deterministic chat ID selection
 [2025-08-28 15:10] [CLAUDE]: IMPL IN_PROGRESS: Fixing context user data key consistency - aligning with spec pseudocode
 [2025-08-28 15:12] [CLAUDE]: IMPL DONE: Context user data key consistency fix - changed 'selected_assignees' to 'sel' to match spec pseudocode
+[2025-08-28 15:20] [Architect]: SPEC READY: Mini App MVP spec added at comms/tasks/2025-08-28-mini-app-mvp.md and ROADMAP updated for Mini App phases.
+[2025-08-28 15:22] [Architect]: DOC ADDED: Introduced TECHADVISOR.md to define the Technical Advisor role, scope, workflow, and deliverables.
+[2025-08-28 15:28] [Architect]: DOC UPDATED: Revised TECHADVISOR.md for a lightweight, non-corporate workflow and tone.
+[2025-08-28 15:35] [Architect]: SPEC READY: Tech Debt Quick Fixes — branding unification, PRIMARY_CHAT_ID, ask aggregation refactor, DM self-assign guard; see comms/tasks/2025-08-28-tech-debt-quick-fixes.md.
+[2025-08-28 15:35] [Architect]: DOC UPDATED: ROADMAP now notes transition to DigitalOcean (domain/DNS/hosting); GCP docs retained temporarily for reference.
+[2025-08-28 15:45] [Architect]: DOC ADDED: DigitalOcean setup guide at docs/digitalocean-setup.md (Droplet, DNS, Caddy HTTPS, systemd services).
+[2025-08-28 15:45] [Architect]: BRANCH CREATED: feature/mini-app-mvp for Mini App and related changes.
+[2025-08-28 15:52] [Architect]: DOC ADDED: Git Branching Cheatsheet at docs/git-branching-cheatsheet.md (commands, tips for local/server, branch juggling).
+\n+[2025-08-28 15:31] [TECHADVISOR]: ADVISORY NOTES: Ford-Fencers Telegram – Asks MVP state + Mini App prep
+- Good: DM-first Asks flows complete; unified /ask DM entry; SQLite WAL + indexes; deterministic chat_id via next(iter(ALLOWED_CHAT_IDS)); graceful DM notification failures handled.
+- Risk (med): Bot naming inconsistency ("UsualSuspects" vs "Ford-Fencers-Bot"). Why it matters: user trust + onboarding clarity. Mitigation: standardize strings in handlers/commands.py and docs to the official handle.
+- Risk (low): GROUP_CONCAT parsing in db.get_all_open_asks fragile for names with commas. Mitigation: aggregate in Python instead of splitting concatenated strings.
+- Risk (low): Mini App config missing. Mitigation: add WEBAPP_URL and stub FastAPI service + static webapp per spec.
+- Do now: unify branding strings; refactor get_all_open_asks to Python grouping; add WEBAPP_URL and deps (fastapi, uvicorn[standard], itsdangerous, python-multipart); create web_server.py skeleton and webapp/ scaffold.
+- Next: optional PRIMARY_CHAT_ID env; add welcome DM button when WEBAPP_URL set; keep INFO logs consistent (user_id, chat_id) across handlers.
+- Questions: confirm official bot username/handle; allow self-assign in New Ask or exclude requester; confirm hosting/HTTPS target for WEBAPP_URL.
