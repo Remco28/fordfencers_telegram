@@ -179,30 +179,23 @@ def get_all_open_asks(chat_id: int) -> List[Dict]:
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.execute("""
             SELECT a.id as ask_id, a.text, a.requester_name,
-                   GROUP_CONCAT(aa.assignee_name || ':' || aa.status) as assignees_status
+                   aa.assignee_name, aa.status
             FROM asks a
             JOIN ask_assignees aa ON a.id = aa.ask_id
             WHERE a.chat_id = ? AND a.status = 'open'
-            GROUP BY a.id, a.text, a.requester_name
-            ORDER BY a.created_at DESC
+            ORDER BY a.created_at DESC, a.id, aa.id
         """, (chat_id,))
         
-        asks = []
-        for row in cursor.fetchall():
-            ask_id, text, requester_name, assignees_raw = row
-            
-            # Parse assignees status
-            assignees = []
-            if assignees_raw:
-                for assignee_status in assignees_raw.split(','):
-                    name, status = assignee_status.split(':', 1)
-                    assignees.append((name, status))
-            
-            asks.append({
-                'ask_id': ask_id,
-                'text': text,
-                'requester_name': requester_name,
-                'assignees': assignees
-            })
+        # Group by ask_id in Python
+        by_id = {}
+        for ask_id, text, requester_name, assignee_name, status in cursor.fetchall():
+            if ask_id not in by_id:
+                by_id[ask_id] = {
+                    "ask_id": ask_id,
+                    "text": text,
+                    "requester_name": requester_name,
+                    "assignees": []
+                }
+            by_id[ask_id]["assignees"].append((assignee_name, status))
         
-        return asks
+        return list(by_id.values())

@@ -1,4 +1,4 @@
-# DigitalOcean Setup Guide — UsualSuspects Bot + Mini App
+# DigitalOcean Setup Guide — Ford-Fencers-Bot + Mini App
 
 This guide sets up the Telegram bot (polling) and the Mini App backend (FastAPI) on a single DigitalOcean Droplet with automatic HTTPS via Caddy. It favors simplicity and low maintenance.
 
@@ -13,7 +13,7 @@ This guide sets up the Telegram bot (polling) and the Mini App backend (FastAPI)
 2. Plan: Basic, Regular Intel/AMD, 1 vCPU / 1GB.
 3. Datacenter: pick nearest region.
 4. Authentication: SSH key (recommended).
-5. Hostname: `usualsuspects-bot`.
+5. Hostname: `ford-fencers-bot`.
 6. Create Droplet and note public IP.
 
 ## 2) Configure DNS
@@ -70,7 +70,7 @@ ALLOWED_CHAT_IDS=            # optional comma-separated list of allowed chat IDs
 PRIMARY_CHAT_ID=             # optional single chat ID for group-scoped asks
 
 # Branding
-BOT_DISPLAY_NAME=UsualSuspects Bot
+BOT_DISPLAY_NAME=Ford-Fencers-Bot
 BOT_HANDLE=@UsualSuspects_bot
 
 # Mini App (Phase 1)
@@ -86,7 +86,7 @@ chown root:bot /etc/fordfencers/bot.env
 Create `/etc/systemd/system/fordfencers-bot.service`:
 ```
 [Unit]
-Description=UsualSuspects Telegram Bot
+Description=Ford-Fencers-Bot Telegram Bot
 After=network-online.target
 
 [Service]
@@ -119,7 +119,7 @@ sudo -u bot bash -lc '
 Create `/etc/systemd/system/fordfencers-web.service`:
 ```
 [Unit]
-Description=UsualSuspects Mini App Web Server (FastAPI)
+Description=Ford-Fencers-Bot Mini App Web Server (FastAPI)
 After=network-online.target
 
 [Service]

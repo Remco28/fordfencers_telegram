@@ -25,10 +25,12 @@ async def start_new_ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
     display_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username or f"User {user.id}"
     db.register_user(user.id, display_name)
     
-    logger.info(f"Starting new ask conversation for user {user.id}")
+    logger.info(f"Starting new ask conversation - user_id: {user.id}, chat_id: {update.effective_chat.id}")
     
-    # Get roster
-    roster = db.get_roster()
+    # Get roster and exclude the requester to prevent self-assignment
+    full_roster = db.get_roster()
+    roster = [(uid, name) for (uid, name) in full_roster if uid != user.id]
+    
     if not roster:
         # Handle both callback query entry (button press) and direct message entry (/ask command)
         if update.callback_query:
@@ -37,7 +39,10 @@ async def start_new_ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             send_func = update.message.reply_text
             
-        await send_func("No family members have started the bot yet. Ask them to send /start to the bot first!")
+        if not full_roster:
+            await send_func("No family members have started the bot yet. Ask them to send /start to the bot first!")
+        else:
+            await send_func("No other family members available to assign tasks to.")
         return ConversationHandler.END
     
     # Initialize selection state
@@ -144,18 +149,22 @@ async def on_submit_ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Error: Missing information. Please start over.")
         return ConversationHandler.END
     
-    # Get display names for assignees
+    # Prevent self-assignment: remove requester_id if present
+    assignees_filtered = [uid for uid in selected if uid != user.id]
+    if not assignees_filtered:
+        await query.edit_message_text("Error: You cannot assign tasks to yourself. Please select at least one other person.")
+        return ConversationHandler.END
+    
+    # Get display names for assignees (using filtered list)
     roster = {uid: name for uid, name in db.get_roster()}
-    assignees = [(uid, roster[uid]) for uid in selected if uid in roster]
+    assignees = [(uid, roster[uid]) for uid in assignees_filtered if uid in roster]
     
     if not assignees:
         await query.edit_message_text("Error: Selected assignees not found. Please start over.")
         return ConversationHandler.END
     
-    # Determine chat_id (use first allowed chat if set, otherwise user's chat)
-    chat_id = update.effective_chat.id
-    if settings.ALLOWED_CHAT_IDS:
-        chat_id = next(iter(settings.ALLOWED_CHAT_IDS))
+    # Determine chat_id (use PRIMARY_CHAT_ID if set, otherwise user's chat)
+    chat_id = settings.PRIMARY_CHAT_ID if settings.PRIMARY_CHAT_ID else update.effective_chat.id
     
     # Create the ask
     requester_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username or f"User {user.id}"
@@ -183,7 +192,7 @@ async def on_submit_ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Your request: {text}"
         )
         
-        logger.info(f"Created ask {ask_id} by user {user.id} with {len(assignees)} assignees")
+        logger.info(f"Created ask {ask_id} - user_id: {user.id}, chat_id: {chat_id}, assignees: {len(assignees)}")
         
     except Exception as e:
         logger.error(f"Error creating ask: {e}")
@@ -215,7 +224,7 @@ async def my_asks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     display_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username or f"User {user.id}"
     db.register_user(user.id, display_name)
     
-    logger.info(f"Showing my asks for user {user.id}")
+    logger.info(f"Showing my asks - user_id: {user.id}, chat_id: {update.effective_chat.id}")
     
     # Handle both callback query and direct command
     if update.callback_query:
@@ -298,7 +307,7 @@ async def on_done_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text("✅ Marked as done! You have no more open assignments! 🎉")
         
-        logger.info(f"User {user.id} completed assignment {assignment_id}")
+        logger.info(f"Assignment completed - user_id: {user.id}, chat_id: {update.effective_chat.id}, assignment_id: {assignment_id}")
         
     except Exception as e:
         logger.error(f"Error marking assignment done: {e}")
@@ -334,7 +343,7 @@ async def all_open_asks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     display_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username or f"User {user.id}"
     db.register_user(user.id, display_name)
     
-    logger.info(f"Showing all open asks for user {user.id}")
+    logger.info(f"Showing all open asks - user_id: {user.id}, chat_id: {update.effective_chat.id}")
     
     # Handle both callback query and direct command
     if update.callback_query:
@@ -343,10 +352,8 @@ async def all_open_asks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         edit_func = update.message.reply_text
     
-    # Determine chat_id (use first allowed chat if set, otherwise user's chat)
-    chat_id = update.effective_chat.id
-    if settings.ALLOWED_CHAT_IDS:
-        chat_id = next(iter(settings.ALLOWED_CHAT_IDS))
+    # Determine chat_id (use PRIMARY_CHAT_ID if set, otherwise user's chat)
+    chat_id = settings.PRIMARY_CHAT_ID if settings.PRIMARY_CHAT_ID else update.effective_chat.id
     
     asks = db.get_all_open_asks(chat_id)
     

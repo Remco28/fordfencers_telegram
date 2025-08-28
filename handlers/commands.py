@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_private_chat(update):
         # Private chat - show DM menu with Asks functionality
         await update.message.reply_text(
-            "UsualSuspects Bot is online! What would you like to do?",
+            f"{settings.BOT_DISPLAY_NAME} is online! What would you like to do?",
             reply_markup=main_menu_dm()
         )
     else:
@@ -48,7 +48,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.info(f"Ignoring start command from unauthorized chat: {chat_id}")
             return
         
-        await update.message.reply_text("UsualSuspects Bot is online.", reply_markup=main_menu())
+        await update.message.reply_text(f"{settings.BOT_DISPLAY_NAME} is online.", reply_markup=main_menu())
 
 
 async def health(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -96,7 +96,7 @@ async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not is_private_chat(update):
         await update.message.reply_text(
-            "Please send me a direct message to create asks! You can start by clicking here: @UsualSuspects_bot"
+            f"Please send me a direct message to create asks! You can start by clicking here: {settings.BOT_HANDLE}"
         )
         return
     
@@ -119,7 +119,7 @@ async def my_asks_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not is_private_chat(update):
         await update.message.reply_text(
-            "Please send me a direct message to view your asks! You can start by clicking here: @UsualSuspects_bot"
+            f"Please send me a direct message to view your asks! You can start by clicking here: {settings.BOT_HANDLE}"
         )
         return
     
@@ -137,7 +137,7 @@ async def all_asks_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not is_private_chat(update):
         await update.message.reply_text(
-            "Please send me a direct message to view all asks! You can start by clicking here: @UsualSuspects_bot"
+            f"Please send me a direct message to view all asks! You can start by clicking here: {settings.BOT_HANDLE}"
         )
         return
     
@@ -155,5 +155,5 @@ async def noop_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await q.answer()
         await q.edit_message_text(
-            "I'll DM you! Please start the bot privately by sending a message to @UsualSuspects_bot."
+            f"I'll DM you! Please start the bot privately by sending a message to {settings.BOT_HANDLE}."
         )

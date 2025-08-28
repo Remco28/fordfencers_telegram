@@ -38,3 +38,14 @@
 - Do now: unify branding strings; refactor get_all_open_asks to Python grouping; add WEBAPP_URL and deps (fastapi, uvicorn[standard], itsdangerous, python-multipart); create web_server.py skeleton and webapp/ scaffold.
 - Next: optional PRIMARY_CHAT_ID env; add welcome DM button when WEBAPP_URL set; keep INFO logs consistent (user_id, chat_id) across handlers.
 - Questions: confirm official bot username/handle; allow self-assign in New Ask or exclude requester; confirm hosting/HTTPS target for WEBAPP_URL.
+
+[2025-08-28 15:53] [CLAUDE]: IMPL IN_PROGRESS: Tech Debt Quick Fixes - branding unification, PRIMARY_CHAT_ID implementation, ask aggregation refactor, self-assign prevention
+
+[2025-08-28 16:05] [CLAUDE]: IMPL DONE: Tech Debt Quick Fixes completed - unified branding with configurable BOT_DISPLAY_NAME/BOT_HANDLE, deterministic PRIMARY_CHAT_ID chat selection, Python-based ask aggregation (no GROUP_CONCAT), self-assign prevention in DM flow, and consistent logging format
+
+[2025-08-28 16:40] [Architect]: SPEC READY: Mini App — Slice 1 (Auth + API + DM Entry) prepared at comms/tasks/2025-08-28-mini-app-slice-1-auth-and-endpoints.md.
+\n+[2025-08-28 16:22] [Architect]: SPEC READY: Bot branding unification — display name Ford-Fencers-Bot, handle @UsualSuspects_bot; see comms/tasks/2025-08-28-bot-branding-unification.md.
+
+[2025-08-28 16:25] [CLAUDE]: IMPL IN_PROGRESS: Bot branding unification - updating defaults, validation, startup logging, and documentation
+
+[2025-08-28 16:35] [CLAUDE]: IMPL DONE: Bot branding unification completed - config defaults updated (Ford-Fencers-Bot/@UsualSuspects_bot), BOT_HANDLE validation with normalization and logging, startup banner uses settings, all documentation updated with consistent branding
