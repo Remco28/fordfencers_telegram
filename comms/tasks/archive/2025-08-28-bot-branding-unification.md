@@ -78,4 +78,3 @@ This removes confusion between the visible name and the unique handle used in li
 ## Notes
 - This task does not modify conversation flows or features.
 - If separate brand assets (icons, descriptions) exist in stores or profiles, update them manually in Telegram as needed.
-

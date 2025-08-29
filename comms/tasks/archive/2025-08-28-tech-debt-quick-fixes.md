@@ -101,4 +101,3 @@ if not assignees: error("Select at least one person other than yourself")
 ## Notes
 - Do not implement Mini App UI or endpoints here; only add `WEBAPP_URL` to config for the next task.
 - Keep changes minimal and aligned with existing code style.
-

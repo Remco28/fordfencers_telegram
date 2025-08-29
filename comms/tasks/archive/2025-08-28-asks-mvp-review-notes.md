@@ -103,4 +103,3 @@ Group chat:
 - Keep callbacks under 64 bytes; current `ak:*` scheme fits.
 - Continue using per-operation SQLite connections with WAL; low traffic should be safe.
 - Maintain INFO logs with user_id and chat_id for auditability.
-

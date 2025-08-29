@@ -22,16 +22,17 @@ This project uses a clear separation of concerns between the Architect and the D
 
 Your typical workflow as the developer:
 
-1. **Check for Tasks:** Read `comms/log.md` to see if there are new specifications marked as `SPEC READY`.
-2. **Read Specification:** Find the current task specification in `comms/tasks/` directory.
-3. **Log Start:** Update `comms/log.md` with `IMPL IN_PROGRESS` status.
-4. **Implement:** Write the code according to the specification:
+1. **Orient:** Read `docs/ARCHITECTURE.md` to understand how components interact before starting any implementation task.
+2. **Check for Tasks:** Read `comms/log.md` to see if there are new specifications marked as `SPEC READY`.
+3. **Read Specification:** Find the current task specification in `comms/tasks/` directory.
+4. **Log Start:** Update `comms/log.md` with `IMPL IN_PROGRESS` status.
+5. **Implement:** Write the code according to the specification:
    * Follow existing code patterns and conventions
    * Use existing libraries and frameworks already in the project
    * Write clean, efficient, production-quality code
    * Test your implementation when possible
-5. **Log Completion:** Update `comms/log.md` with `IMPL DONE` status.
-6. **Submit for Review:** The Architect will review your implementation against the specification.
+6. **Log Completion:** Update `comms/log.md` with `IMPL DONE` status.
+7. **Submit for Review:** The Architect will review your implementation against the specification.
 
 ## Communication Log Format
 

@@ -30,6 +30,22 @@ def parse_primary_chat_id(s: str | None) -> int | None:
         return None
 
 
+def parse_admin_user_ids(s: str | None) -> set[int]:
+    """Parse comma-separated admin user IDs from environment variable."""
+    if not s:
+        return set()
+    
+    admin_ids = set()
+    for part in s.split(','):
+        part = part.strip()
+        if part:
+            try:
+                admin_ids.add(int(part))
+            except ValueError:
+                logging.warning(f"Invalid admin user ID in ADMIN_USER_IDS: {part}")
+    return admin_ids
+
+
 def normalize_bot_handle(handle: str) -> str:
     """Normalize and validate BOT_HANDLE."""
     if not handle.startswith("@"):
@@ -51,6 +67,7 @@ class Settings:
     BOT_HANDLE: str
     PRIMARY_CHAT_ID: int | None
     WEBAPP_URL: str | None
+    ADMIN_USER_IDS: set[int]
 
 
 settings = Settings(
@@ -62,6 +79,7 @@ settings = Settings(
     BOT_HANDLE=normalize_bot_handle(os.getenv("BOT_HANDLE", "@UsualSuspects_bot")),
     PRIMARY_CHAT_ID=parse_primary_chat_id(os.getenv("PRIMARY_CHAT_ID")),
     WEBAPP_URL=os.getenv("WEBAPP_URL"),
+    ADMIN_USER_IDS=parse_admin_user_ids(os.getenv("ADMIN_USER_IDS") or os.getenv("ADMIN_USER_ID")),
 )
 
 

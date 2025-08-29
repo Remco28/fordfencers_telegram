@@ -1,5 +1,5 @@
 import logging
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, MenuButtonWebApp
 from telegram.ext import ContextTypes
 from config import settings
 from keyboards import main_menu, main_menu_dm
@@ -42,6 +42,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{settings.BOT_DISPLAY_NAME} is online! What would you like to do?",
             reply_markup=main_menu_dm()
         )
+        
+        # If WEBAPP_URL is configured, send additional message with WebApp button
+        if settings.WEBAPP_URL:
+            webapp_markup = InlineKeyboardMarkup([[
+                InlineKeyboardButton("Open App", web_app=WebAppInfo(url=settings.WEBAPP_URL))
+            ]])
+            await update.message.reply_text(
+                "Welcome! Tap to open the app:",
+                reply_markup=webapp_markup
+            )
     else:
         # Group chat - check permissions and show basic menu
         if not allowed(chat_id):
@@ -144,6 +154,43 @@ async def all_asks_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Import here to avoid circular imports
     from handlers.asks import all_open_asks
     await all_open_asks(update, context)
+
+
+async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /set_menu command - admin-only command to set the DM Menu Button."""
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id if update.effective_user else None
+    
+    logger.info(f"Set menu command invoked - user_id: {user_id}, chat_id: {chat_id}")
+    
+    # Check if this is a private chat
+    if not is_private_chat(update):
+        await update.message.reply_text("Please send me a direct message to use this command.")
+        return
+    
+    # Check if WEBAPP_URL is configured
+    if not settings.WEBAPP_URL:
+        await update.message.reply_text("WebApp URL is not configured. Please set WEBAPP_URL environment variable.")
+        return
+    
+    # Check if user is an admin
+    if user_id not in settings.ADMIN_USER_IDS:
+        await update.message.reply_text("You don't have permission to use this command.")
+        return
+    
+    # Register user if this is a DM
+    register_user_if_dm(update)
+    
+    try:
+        # Set the menu button
+        await context.bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(text="Open App", web_app=WebAppInfo(url=settings.WEBAPP_URL))
+        )
+        await update.message.reply_text("✅ Menu button set successfully! Users can now access the app via the menu button.")
+        logger.info(f"Menu button set by admin - user_id: {user_id}")
+    except Exception as e:
+        logger.error(f"Error setting menu button: {e}")
+        await update.message.reply_text("❌ Failed to set menu button. Please try again.")
 
 
 async def noop_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):

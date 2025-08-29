@@ -41,7 +41,8 @@ All AIs should post status updates to `comms/log.md` upon starting and completin
 Our collaboration follows a structured, multi-stage process:
 
 1.  **Discuss & Decide:** The User provides a goal. You provide analysis and a recommended technical solution.
-2.  **Specify:** You create a task specification file inside `comms/tasks/`.
+2.  **Specify:** You create a task specification file inside `comms/tasks/`. Update `docs/ARCHITECTURE.md` when introducing new components that change how existing services interact or when adding new integration points
+  between processes.
 3.  **Log Status:** You append a `SPEC READY` message to `comms/log.md`.
 4.  **Execute:** The User gives the specification to another AI for code implementation. That AI can log an `IMPL IN_PROGRESS` and `IMPL DONE` status.
 5.  **Review & Archive:** You perform a **code review** of the implementation against the specification. If the review passes, you archive the task by moving the spec file to `comms/tasks/archive/`.

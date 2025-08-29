@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ford-Fencers-Bot Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .user-info {
+            padding: 15px;
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        h1, h2 {
+            color: var(--tg-theme-text-color, #000000);
+        }
+        .assignment {
+            padding: 10px;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .assignment-text {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .assignment-from {
+            font-size: 0.9em;
+            color: var(--tg-theme-hint-color, #666);
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            color: var(--tg-theme-hint-color, #666);
+        }
+        #createAskForm {
+            padding: 15px;
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 5px;
+            font-family: inherit;
+        }
+        button {
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .roster-select {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .roster-item {
+            padding: 5px;
+            cursor: pointer;
+        }
+        .roster-item:hover {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        .roster-item.selected {
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ford-Fencers Bot</h1>
+        
+        <div id="loadingMessage" class="loading">Loading...</div>
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        
+        <div id="mainContent" style="display: none;">
+            <div class="user-info">
+                <strong>Connected as:</strong> <span id="userName"></span>
+            </div>
+            
+            <div class="section">
+                <h2>My Open Assignments</h2>
+                <div id="assignments">
+                    <div class="loading">Loading assignments...</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Create New Ask</h2>
+                <div id="createAskForm">
+                    <textarea id="askText" placeholder="What do you need help with?"></textarea>
+                    
+                    <h3>Select Assignees:</h3>
+                    <div id="rosterSelect" class="roster-select">
+                        <div class="loading">Loading roster...</div>
+                    </div>
+                    
+                    <button onclick="createAsk()">Create Ask</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let currentUser = null;
+        let roster = [];
+        let selectedAssignees = new Set();
+
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
+            
+            // Try to authenticate
+            authenticate();
+        } else {
+            showError("This app must be opened from Telegram");
+        }
+
+        async function authenticate() {
+            try {
+                const initData = window.Telegram.WebApp.initData;
+                if (!initData) {
+                    throw new Error("No initData available");
+                }
+
+                const response = await fetch('/api/session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ initData: initData })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Authentication failed: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                authToken = data.token;
+                currentUser = data.user;
+
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Load data
+                await Promise.all([
+                    loadAssignments(),
+                    loadRoster()
+                ]);
+
+            } catch (error) {
+                showError(`Authentication error: ${error.message}`);
+            }
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            };
+
+            const response = await fetch(endpoint, { ...options, ...defaultOptions });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} ${errorText}`);
+            }
+
+            return response.json();
+        }
+
+        async function loadAssignments() {
+            try {
+                const assignments = await apiCall('/api/assignments/my');
+                displayAssignments(assignments);
+            } catch (error) {
+                document.getElementById('assignments').innerHTML = 
+                    `<div class="error">Failed to load assignments: ${error.message}</div>`;
+            }
+        }
+
+        async function loadRoster() {
+            try {
+                roster = await apiCall('/api/roster');
+                displayRoster();
+            } catch (error) {
+                document.getElementById('rosterSelect').innerHTML = 
+                    `<div class="error">Failed to load roster: ${error.message}</div>`;
+            }
+        }
+
+        function displayAssignments(assignments) {
+            const container = document.getElementById('assignments');
+            
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="assignment">No open assignments</div>';
+                return;
+            }
+
+            container.innerHTML = assignments.map(assignment => `
+                <div class="assignment">
+                    <div class="assignment-text">${escapeHtml(assignment.text)}</div>
+                    <div class="assignment-from">From: ${escapeHtml(assignment.requester_name)}</div>
+                </div>
+            `).join('');
+        }
+
+        function displayRoster() {
+            const container = document.getElementById('rosterSelect');
+            
+            // Filter out current user
+            const availableRoster = roster.filter(user => user.user_id !== currentUser.id);
+            
+            if (availableRoster.length === 0) {
+                container.innerHTML = '<div>No other users available</div>';
+                return;
+            }
+
+            container.innerHTML = availableRoster.map(user => `
+                <div class="roster-item" data-user-id="${user.user_id}" onclick="toggleAssignee(${user.user_id})">
+                    ${escapeHtml(user.display_name)}
+                </div>
+            `).join('');
+        }
+
+        function toggleAssignee(userId) {
+            if (selectedAssignees.has(userId)) {
+                selectedAssignees.delete(userId);
+            } else {
+                selectedAssignees.add(userId);
+            }
+            updateRosterDisplay();
+        }
+
+        function updateRosterDisplay() {
+            document.querySelectorAll('.roster-item').forEach(item => {
+                const userId = parseInt(item.dataset.userId);
+                item.classList.toggle('selected', selectedAssignees.has(userId));
+            });
+        }
+
+        async function createAsk() {
+            const text = document.getElementById('askText').value.trim();
+            
+            if (!text) {
+                showError('Please enter ask text');
+                return;
+            }
+
+            if (selectedAssignees.size === 0) {
+                showError('Please select at least one assignee');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/api/asks', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        text: text,
+                        assignees: Array.from(selectedAssignees)
+                    })
+                });
+
+                // Clear form
+                document.getElementById('askText').value = '';
+                selectedAssignees.clear();
+                updateRosterDisplay();
+
+                // Show success and reload assignments
+                alert(`Ask created successfully (ID: ${result.ask_id})`);
+                await loadAssignments();
+
+            } catch (error) {
+                showError(`Failed to create ask: ${error.message}`);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

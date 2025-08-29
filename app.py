@@ -1,7 +1,7 @@
 import logging
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, filters
 from config import settings
-from handlers.commands import start, health, version, noop_callback, ask_command, my_asks_command, all_asks_command
+from handlers.commands import start, health, version, noop_callback, ask_command, my_asks_command, all_asks_command, set_menu
 from handlers.asks import (
     start_new_ask, on_toggle_assignee, on_picker_next, on_text_entered, 
     on_submit_ask, on_cancel, my_asks, on_done_click, on_done_confirm, 
@@ -63,6 +63,7 @@ def main():
     app.add_handler(CommandHandler("version", version))
     app.add_handler(CommandHandler("my_asks", my_asks_command))
     app.add_handler(CommandHandler("asks_all", all_asks_command))
+    app.add_handler(CommandHandler("set_menu", set_menu))
     
     # Add Ask conversation handler
     app.add_handler(ask_conv_handler)

@@ -80,8 +80,9 @@ async def on_toggle_assignee(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     context.user_data['sel'] = selected
     
-    # Refresh picker
-    roster = db.get_roster()
+    # Refresh picker - exclude the requester from roster
+    full_roster = db.get_roster()
+    roster = [(uid, name) for (uid, name) in full_roster if uid != update.effective_user.id]
     await query.edit_message_reply_markup(
         reply_markup=assignee_picker(roster, selected)
     )
